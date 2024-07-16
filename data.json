@@ -1,0 +1,84 @@
+{
+  "exercises": [
+    {
+      "name": "Kettlebell Swings",
+      "equipment": "Kettlebell"
+    },
+    {
+      "name": "Pushups",
+      "equipment": "None"
+    },
+    {
+      "name": "Goblet Squats",
+      "equipment": "Kettlebell"
+    },
+    {
+      "name": "Renegade Rows",
+      "equipment": "Kettlebell"
+    },
+    {
+      "name": "Situps",
+      "equipment": "None"
+    },
+    {
+      "name": "Kettlebell snatches",
+      "equipment": "Kettlebell"
+    },
+    {
+      "name": "Single-leg deadlifts",
+      "equipment": "Kettlebell"
+    },
+    {
+      "name": "Dips",
+      "equipment": "Parallettes"
+    },
+    {
+      "name": "Squats",
+      "equipment": "None"
+    },
+    {
+      "name": "Goblet Thruster",
+      "equipment": "Kettlebell"
+    },
+    {
+      "name": "Sumo High Pull",
+      "equipment": "Kettlebell"
+    },
+    {
+      "name": "Mountain Climbers",
+      "equipment": "None"
+    }
+  ],
+  "schemas": [
+    {
+      "name": "21-15-9",
+      "description": "Perform 21 reps, then 15 reps, then 9 reps of each exercise",
+      "time": false,
+      "reps": false
+    },
+    {
+      "name": "AMRAP",
+      "description": "As Many Rounds As Possible in a set time",
+      "time": true,
+      "reps": true
+    },
+    {
+      "name": "EMOM",
+      "description": "Complete as many reps of the excercise as you can in one minute, then switch to the next and repeat.",
+      "time": true,
+      "reps": false
+    },
+    {
+      "name": "5-10-15-20-25-30",
+      "description": "Ascending ladder of reps increasing by 5, start with 5 reps of each excercise then 10 and so on.",
+      "time": false,
+      "reps": false
+    },
+    {
+      "name": "Ascending Ladder",
+      "description": "Ascending ladder of reps increasing by 1, start with 1 reps of each excercise then 2 and so on until time runs out.",
+      "time": true,
+      "reps": false
+    }
+  ]
+}
