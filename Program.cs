@@ -121,9 +121,10 @@ namespace Program
 
     public class Email
     {
-        public static async Task SendEmail( string body )
+        public static async Task SendEmail(string body)
         {
-            try {
+            try
+            {
                 IConfigurationRoot config = new ConfigurationBuilder()
                     .AddEnvironmentVariables()
                     .Build();
@@ -131,14 +132,16 @@ namespace Program
                 DateTime today = DateTime.Today;
 
                 string subject = $"Workout of the Day - {today:D}";
-                string toEmail = "YOUR_EMAIL_ADDRESS";
+                string toEmail = config["EMAIL_TO_ADDRESS"] ?? throw new InvalidOperationException("To email address not found in configuration");
 
-                string fromEmail = config["EMAIL_ADDRESS"] ?? throw new InvalidOperationException("Email address not found in configuration");
-                string smtpPassword = config["EMAIL_PASSWORD"] ?? throw new InvalidOperationException("SMTP password not found in configuration");
+                string fromEmail = config["EMAIL_FROM_ADDRESS"] ?? throw new InvalidOperationException("From email address not found in configuration");
+                string smtpPassword = config["EMAIL_FROM_PASSWORD"] ?? throw new InvalidOperationException("SMTP password not found in configuration");
+                string smtpAddress = config["SMTP_ADDRESS"] ?? throw new InvalidOperationException("SMTP address not found in configuration");
+                int smtpPort = int.Parse(config["SMTP_PORT"] ?? throw new InvalidOperationException("SMTP port not found in configuration"));
 
-                var smtpClient = new SmtpClient("smtp.gmail.com")
+                var smtpClient = new SmtpClient(smtpAddress)
                 {
-                    Port = 587,
+                    Port = smtpPort,
                     Credentials = new NetworkCredential(fromEmail, smtpPassword),
                     EnableSsl = true,
                 };
@@ -149,15 +152,14 @@ namespace Program
             }
             catch (SmtpException ex)
             {
-                Console.WriteLine($"SMTP error occured: {ex.Message}");
+                Console.WriteLine($"SMTP error occurred: {ex.Message}");
                 throw;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An error occured while sending the email: {ex.Message}");
+                Console.WriteLine($"An error occurred while sending the email: {ex.Message}");
                 throw;
             }
-            
         }
     }
 
