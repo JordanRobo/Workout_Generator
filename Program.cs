@@ -72,11 +72,11 @@ namespace Program
             
             List<string> selectedExercises = new List<string>();
 
-            for (int i =0; i < noExercises; i++)
+            for (int i = 0; i < noExercises; i++)
             {
-                int index = random.Next(data.Exercises.Count);
-                selectedExercises.Add(data.Exercises[index].Name);
-                data.Exercises.RemoveAt(index);
+                int index = random.Next(availableExercises.Count);
+                selectedExercises.Add(availableExercises[index].Name);
+                availableExercises.RemoveAt(index);
             }
 
             return selectedExercises;
@@ -123,28 +123,41 @@ namespace Program
     {
         public static async Task SendEmail( string body )
         {
-            IConfigurationRoot config = new ConfigurationBuilder()
-            .AddUserSecrets<App>()
-            .Build();
+            try {
+                IConfigurationRoot config = new ConfigurationBuilder()
+                .AddUserSecrets<App>()
+                .Build();
 
-            DateTime today = DateTime.Today; 
+                DateTime today = DateTime.Today;
 
-            string subject = $"Workout of the Day - {today:D}";
-            string toEmail = "jordanrobo11@gmail.com";
+                string subject = $"Workout of the Day - {today:D}";
+                string toEmail = "jordanrobo11@gmail.com";
 
-            string fromEmail = config["EmailSettings:Email"]!;
-            string smtpPassword = config["EmailSettings:Password"]!;
+                string fromEmail = config["EmailSettings:Email"] ?? throw new InvalidOperationException("Email address not found in configuration");
+                string smtpPassword = config["EmailSettings:Password"] ?? throw new InvalidOperationException("SMTP password not found in configuration");
 
-            var smtpClient = new SmtpClient("smtp.gmail.com")
+                var smtpClient = new SmtpClient("smtp.gmail.com")
+                {
+                    Port = 587,
+                    Credentials = new NetworkCredential(fromEmail, smtpPassword),
+                    EnableSsl = true,
+                };
+
+                var mailMessage = new MailMessage(fromEmail, toEmail, subject, body);
+
+                await smtpClient.SendMailAsync(mailMessage);
+            }
+            catch (SmtpException ex)
             {
-                Port = 587,
-                Credentials = new NetworkCredential(fromEmail, smtpPassword),
-                EnableSsl = true,
-            };
-
-            var mailMessage = new MailMessage(fromEmail, toEmail, subject, body);
-
-            await smtpClient.SendMailAsync(mailMessage);
+                Console.WriteLine($"SMTP error occured: {ex.Message}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occured while sending the email: {ex.Message}");
+                throw;
+            }
+            
         }
     }
 
