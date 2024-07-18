@@ -1,35 +1,38 @@
 ﻿using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Net;
+using System.Net.Mail;
+using Microsoft.Extensions.Configuration;
 
 namespace Program
 {
     class App
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            static bool TimeCheck()
-            {
-                return true;
-            }
+            DateTime utcDate = DateTime.UtcNow;
 
-            if (TimeCheck())
+            try
             {
                 string workout = RandomGenerator.GenerateWorkout();
-                Console.WriteLine(workout);
-                // Add in Email.SendEmail(workout); method here once ready
-            } 
-            else
-            {
-                Console.WriteLine("The Time is not 5am AEST");
+                Console.WriteLine($"[{utcDate}]: Workout Successfully Generated, Sending Email...");
+
+                await Email.SendEmail(workout);
+                Console.WriteLine($"[{utcDate}]: Email Sent Successfully");
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error [{utcDate}]: {ex.Message}");
+            }
+
         }
 
     }
 
     public class RandomGenerator
     {        
-        public static Schema SelectWorkoutSchema()
+        private static Schema SelectWorkoutSchema()
         {
             WorkoutData data = Workout.ReadData();
             Random random = new Random();
@@ -38,7 +41,7 @@ namespace Program
             return data.Schemas[index];
         }
 
-        public static string DetermineTimeLimit()
+        private static string DetermineTimeLimit()
         {
             Random random = new Random();
             int[] timeValues = [ 10, 12, 15, 18, 20, 21 ];
@@ -48,7 +51,7 @@ namespace Program
             return timeLimit;
         }
 
-        public static string DetermineReps()
+        private static string DetermineReps()
         {
             Random random = new Random();
             int[] repValues = [ 5, 6, 10, 12, 15, 18, 20, 21, 25, 30 ];
@@ -58,18 +61,22 @@ namespace Program
             return reps;
         }
 
-        public static List<string> SelectExercises()
+        private static List<string> SelectExercises()
         {
             Random random = new Random();
-            int noExercises = random.Next(2,5);
-
             WorkoutData data = Workout.ReadData();
+            List<Exercise> availableExercises = new(data.Exercises);
+
+            int noExercises = random.Next(2,5);
+            noExercises = Math.Min(noExercises, availableExercises.Count);
+            
             List<string> selectedExercises = new List<string>();
 
             for (int i =0; i < noExercises; i++)
             {
                 int index = random.Next(data.Exercises.Count);
                 selectedExercises.Add(data.Exercises[index].Name);
+                data.Exercises.RemoveAt(index);
             }
 
             return selectedExercises;
@@ -114,9 +121,30 @@ namespace Program
 
     public class Email
     {
-        public static void SendEmail()
+        public static async Task SendEmail( string body )
         {
-            Console.WriteLine("Send email to an address containing the Workout of the Day");
+            IConfigurationRoot config = new ConfigurationBuilder()
+            .AddUserSecrets<App>()
+            .Build();
+
+            DateTime today = DateTime.Today; 
+
+            string subject = $"Workout of the Day - {today:D}";
+            string toEmail = "jordanrobo11@gmail.com";
+
+            string fromEmail = config["EmailSettings:Email"]!;
+            string smtpPassword = config["EmailSettings:Password"]!;
+
+            var smtpClient = new SmtpClient("smtp.gmail.com")
+            {
+                Port = 587,
+                Credentials = new NetworkCredential(fromEmail, smtpPassword),
+                EnableSsl = true,
+            };
+
+            var mailMessage = new MailMessage(fromEmail, toEmail, subject, body);
+
+            await smtpClient.SendMailAsync(mailMessage);
         }
     }
 
