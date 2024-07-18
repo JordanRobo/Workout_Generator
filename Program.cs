@@ -125,16 +125,16 @@ namespace Program
         {
             try {
                 IConfigurationRoot config = new ConfigurationBuilder()
-                .AddUserSecrets<App>()
-                .Build();
+                    .AddEnvironmentVariables()
+                    .Build();
 
                 DateTime today = DateTime.Today;
 
                 string subject = $"Workout of the Day - {today:D}";
-                string toEmail = "jordanrobo11@gmail.com";
+                string toEmail = "YOUR_EMAIL_ADDRESS";
 
-                string fromEmail = config["EmailSettings:Email"] ?? throw new InvalidOperationException("Email address not found in configuration");
-                string smtpPassword = config["EmailSettings:Password"] ?? throw new InvalidOperationException("SMTP password not found in configuration");
+                string fromEmail = config["EMAIL_ADDRESS"] ?? throw new InvalidOperationException("Email address not found in configuration");
+                string smtpPassword = config["EMAIL_PASSWORD"] ?? throw new InvalidOperationException("SMTP password not found in configuration");
 
                 var smtpClient = new SmtpClient("smtp.gmail.com")
                 {
